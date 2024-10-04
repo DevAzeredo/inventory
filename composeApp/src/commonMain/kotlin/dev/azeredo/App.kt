@@ -1,6 +1,7 @@
 package dev.azeredo
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,8 +12,11 @@ import org.koin.compose.KoinContext
 import stock.composeapp.generated.resources.Res
 import stock.composeapp.generated.resources.compose_multiplatform
 import androidx.compose.material.*
-import androidx.compose.ui.text.input.KeyboardType.Companion.Text
+import androidx.compose.material3.MaterialTheme
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
+@Preview
 @Composable
 fun App() {
     MaterialTheme {

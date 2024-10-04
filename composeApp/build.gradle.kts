@@ -32,7 +32,7 @@ kotlin {
     
     sourceSets {
         val desktopMain by getting
-        
+        val material3_version = "1.6.11"
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
@@ -50,8 +50,9 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
 
-            implementation("androidx.compose.material3:material3:$material3_version")
-
+            implementation("org.jetbrains.compose.material3:material3:$material3_version")
+            implementation("org.jetbrains.compose.components:components-ui-tooling-preview:1.6.11")
+            //di
             api(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
@@ -61,6 +62,8 @@ kotlin {
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
+            implementation("org.jetbrains.compose.ui:ui-tooling-preview-desktop:1.6.11")
+            implementation("org.jetbrains.compose.material3:material3-desktop:$material3_version")
         }
     }
 }
