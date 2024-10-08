@@ -4,9 +4,11 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
+    alias(libs.plugins.androidApplication)
 }
 
 kotlin {
@@ -16,9 +18,9 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     jvm("desktop")
-    
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -29,16 +31,18 @@ kotlin {
             isStatic = true
         }
     }
-    
+
     sourceSets {
         val desktopMain by getting
-        val material3_version = "1.6.11"
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
 
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.compose)
+            implementation(libs.androidx.room.ktx)
+            implementation(libs.room.runtime.android)
+
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -50,20 +54,24 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
 
-            implementation("org.jetbrains.compose.material3:material3:$material3_version")
-            implementation("org.jetbrains.compose.components:components-ui-tooling-preview:1.6.11")
+            implementation(libs.material3)
+            implementation(libs.components.ui.tooling.preview)
             //di
             api(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.lifecycle.viewmodel)
             implementation(libs.navigation.compose)
+            // db
+            implementation(libs.room.runtime)
+            implementation(libs.sqlite.bundled)
+
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
-            implementation("org.jetbrains.compose.ui:ui-tooling-preview-desktop:1.6.11")
-            implementation("org.jetbrains.compose.material3:material3-desktop:$material3_version")
+            implementation(libs.ui.tooling.preview.desktop)
+            implementation(libs.material3.desktop)
         }
     }
 }
@@ -105,6 +113,19 @@ android {
     }
 }
 
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
+dependencies {
+    add("kspAndroid", libs.room.compiler)
+    // JVM (Desktop)
+    add("kspDesktop", libs.room.compiler)
+    // iOS
+    add("kspIosSimulatorArm64", libs.room.compiler)
+    add("kspIosX64", libs.room.compiler)
+    add("kspIosArm64", libs.room.compiler)
+}
 compose.desktop {
     application {
         mainClass = "dev.azeredo.MainKt"

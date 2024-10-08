@@ -8,7 +8,7 @@ fun main() = application {
     initKoin()
     Window(
         onCloseRequest = ::exitApplication,
-        title = "stock",
+        title = "inventory",
     ) {
         App()
     }
