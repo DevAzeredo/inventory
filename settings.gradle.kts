@@ -1,4 +1,4 @@
-rootProject.name = "stock"
+rootProject.name = "inventory"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {

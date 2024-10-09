@@ -10,5 +10,9 @@ import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val RepositoryModule = module {
+    single<ProductRepository> { ProductRepositoryImpl(get()) }
+}
 
+val DaoModule = module {
+    single<ProductDao> { get<AppDatabase>().getProductDao() }
 }

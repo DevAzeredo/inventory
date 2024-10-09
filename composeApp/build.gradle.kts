@@ -65,7 +65,8 @@ kotlin {
             // db
             implementation(libs.room.runtime)
             implementation(libs.sqlite.bundled)
-
+            //navigation
+            implementation(libs.navigation.compose.v270alpha07)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)

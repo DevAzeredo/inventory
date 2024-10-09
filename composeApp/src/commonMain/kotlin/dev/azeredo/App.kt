@@ -1,17 +1,26 @@
 package dev.azeredo
 
-import ProductRepository
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import dev.azeredo.presentation.tst.ProductScreen
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import dev.azeredo.presentation.addproduct.AddProductScreen
+import dev.azeredo.presentation.productlist.ProductListScreen
 import org.koin.compose.KoinContext
 
 @Composable
 fun App() {
     MaterialTheme {
         KoinContext {
-            ProductScreen()
+            val navController = rememberNavController()
+            NavHost(
+                navController = navController,
+                startDestination = "ProductListScreen"
+            ) {
+                composable("ProductListScreen") { ProductListScreen(navController) }
+                composable("AddProductScreen") { AddProductScreen(navController) }
+            }
         }
     }
 }
