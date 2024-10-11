@@ -1,11 +1,13 @@
 package dev.azeredo.di
 
-import addProduct
-import getAllProducts
+import dev.azeredo.domain.usecase.product.AddProduct
+import dev.azeredo.domain.usecase.product.getAllProducts
 import dev.azeredo.data.AppDatabase
 import dev.azeredo.data.getRoomDatabase
 import dev.azeredo.di.modules.DaoModule
 import dev.azeredo.di.modules.RepositoryModule
+import dev.azeredo.domain.usecase.category.AddCategory
+import dev.azeredo.domain.usecase.category.GetAllCategories
 import dev.azeredo.platform.platformModule
 import dev.azeredo.presentation.addproduct.AddProductViewModel
 import dev.azeredo.presentation.productlist.ProductListViewModel
@@ -13,8 +15,8 @@ import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
-import removeProduct
-import updateProduct
+import dev.azeredo.domain.usecase.product.removeProduct
+import dev.azeredo.domain.usecase.product.updateProduct
 
 fun initKoin(config: KoinAppDeclaration? = null) {
     startKoin {
@@ -38,8 +40,12 @@ val appModule = module {
 }
 
 val domainModule = module {
+    // product
     factory { getAllProducts(get()) }
-    factory { addProduct(get()) }
+    factory { AddProduct(get()) }
     factory { removeProduct(get()) }
     factory { updateProduct(get()) }
+    // category
+    factory { AddCategory(get()) }
+    factory { GetAllCategories(get()) }
 }

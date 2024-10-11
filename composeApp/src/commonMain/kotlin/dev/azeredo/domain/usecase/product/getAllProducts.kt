@@ -1,3 +1,7 @@
+package dev.azeredo.domain.usecase.product
+
+import Product
+import ProductRepository
 import kotlinx.coroutines.flow.Flow
 
 class getAllProducts(private val productRepository: ProductRepository) {

@@ -3,29 +3,48 @@ package dev.azeredo.presentation.addproduct
 import Product
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.azeredo.data.AppDatabase
-import dev.azeredo.data.toEntity
+import dev.azeredo.domain.model.Category
+import dev.azeredo.domain.usecase.category.AddCategory
+import dev.azeredo.domain.usecase.category.GetAllCategories
+import dev.azeredo.domain.usecase.product.AddProduct
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class AddProductViewModel(private val repository: AppDatabase) : ViewModel() {
+class AddProductViewModel(
+    private val addProduct: AddProduct,
+    private val addCategory: AddCategory,
+    private val getAllCategories: GetAllCategories
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AddProductUiState())
     val uiState: StateFlow<AddProductUiState> get() = _uiState.asStateFlow()
 
-    fun addProduct() {
+    init {
         viewModelScope.launch {
-            repository.getProductDao().insertProduct(
-                _uiState.value.product.toEntity()
-            )
+            getAllCategories.invoke().collect { c ->
+                _uiState.value =
+                    _uiState.value.copy(categories = c)
+            }
         }
     }
 
-    fun setCategory(newCategory: String) {
+    fun addProduct() {
+        viewModelScope.launch {
+            addProduct.invoke(_uiState.value.product)
+        }
+    }
+
+    fun addCategory(newCategoryName: String) {
+        viewModelScope.launch {
+            addCategory.invoke(Category(0, newCategoryName))
+        }
+    }
+
+    fun setCategory(newCategory: Category) {
         _uiState.value =
-            _uiState.value.copy(product = _uiState.value.product.copy(categoryId = newCategory))
+            _uiState.value.copy(product = _uiState.value.product.copy(category = newCategory))
     }
 
     fun setName(newName: String) {
@@ -33,7 +52,13 @@ class AddProductViewModel(private val repository: AppDatabase) : ViewModel() {
     }
 
     fun setPrice(newPrice: Double) {
-        _uiState.value = _uiState.value.copy(product = _uiState.value.product.copy(price = newPrice))
+        _uiState.value =
+            _uiState.value.copy(product = _uiState.value.product.copy(price = newPrice))
+    }
+
+    fun setQuantity(newQuantity: Double) {
+        _uiState.value =
+            _uiState.value.copy(product = _uiState.value.product.copy(quantity = newQuantity))
     }
 
     data class AddProductUiState(
@@ -41,16 +66,11 @@ class AddProductViewModel(private val repository: AppDatabase) : ViewModel() {
             id = 0,
             name = "",
             price = 0.0,
-            quantity = 0,
-            categoryId = "",
+            quantity = 0.0,
+            category = Category(0, ""),
             creationDate = 0,
             updateDate = 0
         ),
-        val categories: List<String> = listOf(
-            "Categoria 1",
-            "Categoria 2",
-            "Categoria 3",
-            "Categoria 4"
-        )
+        val categories: List<Category> = emptyList()
     )
 }

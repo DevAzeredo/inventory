@@ -1,6 +1,5 @@
-package dev.azeredo.data
+package dev.azeredo.data.product
 
-import Product
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -11,9 +10,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ProductDao {
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertProduct(product: ProductEntity)
+    suspend fun insertProduct(product: ProductEntity): Long
 
     @Delete
     suspend fun deleteProduct(product: ProductEntity)
@@ -21,9 +19,9 @@ interface ProductDao {
     @Update
     suspend fun updateProduct(product: ProductEntity)
 
-    @Query("SELECT * FROM products ORDER BY creationDate DESC")
+    @Query("SELECT * FROM products")
     fun getAllProducts(): Flow<List<ProductEntity>>
 
     @Query("SELECT * FROM products WHERE id = :productId LIMIT 1")
-    suspend fun getProductById(productId: Int): ProductEntity?
+    suspend fun getProductById(productId: Long): ProductEntity?
 }

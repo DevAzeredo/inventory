@@ -4,7 +4,7 @@ import Product
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.azeredo.data.AppDatabase
-import getAllProducts
+import dev.azeredo.domain.usecase.product.getAllProducts
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -47,11 +47,10 @@ class ProductListViewModel(
             _uiState.value = _uiState.value.copy(productListFiltered = filteredList)
         }
     }
+    fun onRemoveProduct(input: String) {
+        viewModelScope.launch {
 
-    fun removeProduct(product: Product) {
-//        viewModelScope.launch {
-//            repository.delete(product)
-//        }
+        }
     }
 
     data class ProductListUiState(

@@ -7,11 +7,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -55,17 +57,16 @@ fun ProductListScreen(navController: NavController) {
         topBar = { SearchTopBar(viewModel, navController) },
         floatingActionButton = { ProductFabMenu(navController) },
         modifier = Modifier.fillMaxSize()
-    ) { paddingValues ->
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
+                .padding(top = 86.dp),
             contentAlignment = Alignment.Center
         ) {
             ProductListContent(
                 productList = uiState.productListFiltered,
-                onRemoveProduct = { product -> viewModel.removeProduct(product) },
-                modifier = Modifier.padding(paddingValues)
+                modifier = Modifier
             )
         }
     }
@@ -99,11 +100,11 @@ fun SearchTopBar(viewModel: ProductListViewModel, navController: NavController) 
             IconButton(onClick = { navController.navigateUp() }) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Back")
             }
-        }
+        },
+        modifier = Modifier.padding(16.dp).height(56.dp)
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductFabMenu(navController: NavController) {
     var isFabMenuExpanded by remember { mutableStateOf(false) }
@@ -143,7 +144,6 @@ fun ProductFabMenu(navController: NavController) {
 @Composable
 fun ProductListContent(
     productList: Flow<List<Product>>,
-    onRemoveProduct: (Product) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val products by productList.collectAsState(initial = emptyList())
@@ -155,12 +155,11 @@ fun ProductListContent(
     ) {
         products.forEach { product ->
             Box(modifier = Modifier.width(300.dp).padding(8.dp)) {
-                ProductItem(product = product, onClick = { onRemoveProduct(product) })
+                ProductItem(product = product, onClick = { /* TODO ABRIR O DETALHES DO PRODUTO*/ })
             }
         }
     }
 }
-
 
 @Composable
 fun ProductItem(product: Product, onClick: () -> Unit) {
@@ -177,6 +176,7 @@ fun ProductItem(product: Product, onClick: () -> Unit) {
                 modifier = Modifier.padding(16.dp).width(50.dp).height(50.dp),
             )
             Text(text = product.name, style = MaterialTheme.typography.bodyMedium)
+            Text(text = "Categoria: ${product.category.description}")
             Text(text = "Quantidade: ${product.quantity}")
         }
     }

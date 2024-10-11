@@ -1,29 +1,30 @@
-package dev.azeredo.data
+package dev.azeredo.data.product
 
 import Product
+import dev.azeredo.domain.model.Category
 
-// Mapeia de Domain Model para Entity
 fun Product.toEntity(): ProductEntity {
     return ProductEntity(
         id = this.id,
         name = this.name,
-        categoryId = this.categoryId,
+        categoryId = this.category.id,
         price = this.price,
         quantity = this.quantity,
         creationDate = this.creationDate,
-        updateDate = this.updateDate
+        updateDate = this.updateDate,
+//        image = this.image
     )
 }
 
-// Mapeia de Entity para Domain Model
 fun ProductEntity.toDomain(): Product {
     return Product(
         id = this.id,
         name = this.name,
-        categoryId = this.categoryId,
+        category = Category(this.categoryId, ""),
         price = this.price,
         quantity = this.quantity,
         creationDate = this.creationDate,
-        updateDate = this.updateDate
+        updateDate = this.updateDate,
+//        image = this.image
     )
 }
