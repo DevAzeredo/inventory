@@ -7,19 +7,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.DropdownMenu
@@ -43,9 +43,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import dev.azeredo.presentation.AppIcons
 import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -61,12 +65,11 @@ fun ProductListScreen(navController: NavController) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 86.dp),
+                .padding(top = 100.dp),
             contentAlignment = Alignment.Center
         ) {
             ProductListContent(
-                productList = uiState.productListFiltered,
-                modifier = Modifier
+                productList = uiState.productListFiltered, navController = navController
             )
         }
     }
@@ -87,7 +90,7 @@ fun SearchTopBar(viewModel: ProductListViewModel, navController: NavController) 
                 placeholder = { Text("Search products") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 8.dp),
+                    .padding(8.dp),
                 singleLine = true,
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
                 colors = TextFieldDefaults.textFieldColors(
@@ -96,12 +99,6 @@ fun SearchTopBar(viewModel: ProductListViewModel, navController: NavController) 
                 )
             )
         },
-        navigationIcon = {
-            IconButton(onClick = { navController.navigateUp() }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-            }
-        },
-        modifier = Modifier.padding(16.dp).height(56.dp)
     )
 }
 
@@ -126,8 +123,31 @@ fun ProductFabMenu(navController: NavController) {
                     navController.navigate("AddProductScreen")
 
                 },
-                leadingIcon = { Icon(Icons.Default.Add, contentDescription = "Add Product") }
+                leadingIcon = { Icon(Icons.Default.Menu, contentDescription = "Add Product") }
             )
+            DropdownMenuItem(
+                text = { Text("Inbound") },
+                onClick = {
+                    isFabMenuExpanded = false
+                    navController.navigate("InboundScreen")
+                },
+                leadingIcon = {
+                    Icon(
+                        AppIcons.Outbound,
+                        contentDescription = "Inbound",
+                        modifier = Modifier.rotate(180f)
+                    )
+                }
+            )
+            DropdownMenuItem(
+                text = { Text("Outbound") },
+                onClick = {
+                    isFabMenuExpanded = false
+                    navController.navigate("OutboundScreen")
+                },
+                leadingIcon = { Icon(AppIcons.Outbound, contentDescription = "Outbound") }
+            )
+
             DropdownMenuItem(
                 text = { Text("Reports") },
                 onClick = {
@@ -144,18 +164,26 @@ fun ProductFabMenu(navController: NavController) {
 @Composable
 fun ProductListContent(
     productList: Flow<List<Product>>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    navController: NavController
 ) {
     val products by productList.collectAsState(initial = emptyList())
 
     FlowRow(
         modifier = modifier.verticalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.Center,
         verticalArrangement = Arrangement.Center
     ) {
         products.forEach { product ->
             Box(modifier = Modifier.width(300.dp).padding(8.dp)) {
-                ProductItem(product = product, onClick = { /* TODO ABRIR O DETALHES DO PRODUTO*/ })
+                ProductItem(
+                    product = product,
+                    onClick = {
+                        navController.navigate(
+                            "AddProductScreen/${
+                                Json.encodeToString(product)
+                            }"
+                        )
+                    })
             }
         }
     }

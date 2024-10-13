@@ -24,10 +24,13 @@ class AddProductViewModel(
     init {
         viewModelScope.launch {
             getAllCategories.invoke().collect { c ->
-                _uiState.value =
-                    _uiState.value.copy(categories = c)
+                _uiState.value = _uiState.value.copy(categories = c)
             }
         }
+    }
+
+    fun setProduct(product: Product) {
+        _uiState.value = _uiState.value.copy(product = product)
     }
 
     fun addProduct() {
@@ -70,7 +73,6 @@ class AddProductViewModel(
             category = Category(0, ""),
             creationDate = 0,
             updateDate = 0
-        ),
-        val categories: List<Category> = emptyList()
+        ), val categories: List<Category> = emptyList()
     )
 }

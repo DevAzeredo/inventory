@@ -15,7 +15,6 @@ import kotlinx.coroutines.launch
 
 
 class ProductListViewModel(
-    private val repository: AppDatabase,
     private val getAllProducts: getAllProducts
 ) : ViewModel() {
 

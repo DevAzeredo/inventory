@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
     alias(libs.plugins.androidApplication)
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.20"
 }
 
 kotlin {
@@ -56,6 +57,9 @@ kotlin {
 
             implementation(libs.material3)
             implementation(libs.components.ui.tooling.preview)
+            implementation(libs.kotlinx.serialization.core)
+            implementation(libs.kotlinx.serialization.json)
+
             //di
             api(libs.koin.core)
             implementation(libs.koin.compose)
@@ -67,6 +71,8 @@ kotlin {
             implementation(libs.sqlite.bundled)
             //navigation
             implementation(libs.navigation.compose.v270alpha07)
+
+
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)

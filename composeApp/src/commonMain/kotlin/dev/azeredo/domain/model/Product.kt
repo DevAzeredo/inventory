@@ -1,5 +1,7 @@
 import dev.azeredo.domain.model.Category
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Product(
     val id: Long = 0,
     val name: String,

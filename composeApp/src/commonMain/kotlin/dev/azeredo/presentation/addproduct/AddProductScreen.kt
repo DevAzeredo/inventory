@@ -2,6 +2,7 @@
 
 package dev.azeredo.presentation.addproduct
 
+import Product
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,8 +49,10 @@ import dev.azeredo.domain.model.Category
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun AddProductScreen(navController: NavController) {
+fun AddProductScreen(navController: NavController, product: Product?) {
     val viewModel = koinViewModel<AddProductViewModel>()
+    if (product != null)
+        viewModel.setProduct(product)
     val uiState by viewModel.uiState.collectAsState()
     var expanded by remember { mutableStateOf(false) }
 
@@ -158,6 +161,7 @@ fun ProductForm(
         viewModel.setQuantity(newQuantity.toDoubleOrNull() ?: 0.0)
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryDropdown(
@@ -248,6 +252,7 @@ fun cardNewItem(
         }
     }
 }
+
 @Composable
 fun ProductPriceField(value: String, onValueChange: (String) -> Unit) {
     OutlinedTextField(

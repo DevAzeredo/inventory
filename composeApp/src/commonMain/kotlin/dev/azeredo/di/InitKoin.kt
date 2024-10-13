@@ -11,6 +11,7 @@ import dev.azeredo.domain.usecase.category.GetAllCategories
 import dev.azeredo.platform.platformModule
 import dev.azeredo.presentation.addproduct.AddProductViewModel
 import dev.azeredo.presentation.productlist.ProductListViewModel
+import dev.azeredo.presentation.inbound.InboundViewModel
 import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.KoinAppDeclaration
@@ -37,6 +38,7 @@ val appModule = module {
     }
     viewModelOf(::ProductListViewModel)
     viewModelOf(::AddProductViewModel)
+    viewModelOf(::InboundViewModel)
 }
 
 val domainModule = module {
