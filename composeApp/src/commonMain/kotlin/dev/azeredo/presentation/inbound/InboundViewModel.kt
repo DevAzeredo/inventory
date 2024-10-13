@@ -8,13 +8,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
 
 class InboundViewModel(
-    getAllProducts: getAllProducts
+    private val getAllProducts: getAllProducts
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(InboundUiState())
@@ -46,22 +46,26 @@ class InboundViewModel(
 
     fun addProductInbound(product: Product, amount: Double) {
         viewModelScope.launch {
-        val existingProduct = _uiState.value.selectedProductList.collect()
+            val currentList = _uiState.value.selectedProductList.first()
 
-        if (existingProduct != null) {
-            // Se o produto já está na lista, aumentar a quantidade
-            val updatedQuantity = existingProduct.quantity + amount
-            selectedProductList = selectedProductList.map {
-                if (it.product.id == product.id) it.copy(quantity = updatedQuantity) else it
+            val existingProduct = currentList.firstOrNull { it.id == product.id }
+
+            if (existingProduct != null) {
+                val updatedQuantity = existingProduct.quantity + amount
+                val updatedProductList = currentList.map {
+                    if (it.id == product.id) it.copy(quantity = updatedQuantity) else it
+                }
+                _uiState.value =
+                    _uiState.value.copy(selectedProductList = flowOf(updatedProductList))
+            } else {
+                val updatedProductList = currentList + product.copy(quantity = amount)
+                _uiState.value =
+                    _uiState.value.copy(selectedProductList = flowOf(updatedProductList))
             }
-        } else {
-            // Se o produto não está na lista, adicionar como novo item
-            selectedProductList = selectedProductList + ProductWithQuantity(product = product, quantity = amount)
         }
-    } }
-
-    data class InboundUiState(
-        val productList: Flow<List<Product>> = flowOf(emptyList()),
-        val selectedProductList: Flow<List<Product>> = flowOf(emptyList())
-    )
+    }
 }
+data class InboundUiState(
+    val productList: Flow<List<Product>> = flowOf(emptyList()),
+    val selectedProductList: Flow<List<Product>> = flowOf(emptyList())
+)

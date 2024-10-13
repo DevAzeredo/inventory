@@ -8,6 +8,7 @@ import dev.azeredo.di.modules.DaoModule
 import dev.azeredo.di.modules.RepositoryModule
 import dev.azeredo.domain.usecase.category.AddCategory
 import dev.azeredo.domain.usecase.category.GetAllCategories
+import dev.azeredo.domain.usecase.product.GetProductById
 import dev.azeredo.platform.platformModule
 import dev.azeredo.presentation.addproduct.AddProductViewModel
 import dev.azeredo.presentation.productlist.ProductListViewModel
@@ -47,6 +48,7 @@ val domainModule = module {
     factory { AddProduct(get()) }
     factory { removeProduct(get()) }
     factory { updateProduct(get()) }
+    factory { GetProductById(get()) }
     // category
     factory { AddCategory(get()) }
     factory { GetAllCategories(get()) }

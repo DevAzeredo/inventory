@@ -44,64 +44,70 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.azeredo.domain.model.Category
+import dev.azeredo.presentation.getDecimalRegex
 import org.koin.compose.viewmodel.koinViewModel
 
+
+data class AddProductScreen(val product: Product? = null) : Screen {
+    @Composable
+    override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+        AddProductScreen(
+            navigator,
+            product ?: Product(0, "", Category(0, ""), 0.0, 0.0, 0, 0)
+        )
+    }
+}
+
 @Composable
-fun AddProductScreen(navController: NavController, product: Product?) {
+fun AddProductScreen(navigator: Navigator, product: Product) {
     val viewModel = koinViewModel<AddProductViewModel>()
-    if (product != null)
-        viewModel.setProduct(product)
+    viewModel.setProduct(product)
     val uiState by viewModel.uiState.collectAsState()
     var expanded by remember { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = { ProductTopBar(navController) },
-        floatingActionButton = { ActionButtons(navController, viewModel) }
-    ) { paddingValues ->
+    Scaffold(topBar = { ProductTopBar(navigator) },
+        floatingActionButton = { ActionButtons(navigator, viewModel) }) { paddingValues ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp),
+            modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             ProductImage()
             Spacer(modifier = Modifier.height(16.dp))
-            ProductForm(uiState, viewModel, expanded, { expanded = !expanded })
+            ProductForm(uiState, viewModel, expanded) { expanded = !expanded }
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductTopBar(navController: NavController) {
-    TopAppBar(
-        title = { Text("Adicionar Produto") },
-        navigationIcon = {
-            IconButton(onClick = { navController.navigateUp() }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Voltar")
-            }
+fun ProductTopBar(navigator: Navigator) {
+    TopAppBar(title = { Text("Adicionar Produto") }, navigationIcon = {
+        IconButton(onClick = {
+            navigator.pop()
+        }) {
+            Icon(Icons.Default.ArrowBack, contentDescription = "Voltar")
         }
-    )
+    })
 }
 
 @Composable
-fun ActionButtons(navController: NavController, viewModel: AddProductViewModel) {
+fun ActionButtons(navigator: Navigator, viewModel: AddProductViewModel) {
     Row {
-        ExtendedFloatingActionButton(
-            content = { Text("Salvar") },
-            onClick = {
-                viewModel.addProduct()
-                navController.navigateUp()
-            },
-            containerColor = MaterialTheme.colorScheme.primary
+        ExtendedFloatingActionButton(content = { Text("Salvar") }, onClick = {
+            viewModel.addProduct()
+            navigator.pop()
+        }, containerColor = MaterialTheme.colorScheme.primary
         )
         Spacer(modifier = Modifier.width(16.dp))
         ExtendedFloatingActionButton(
             content = { Text("Cancelar") },
-            onClick = { navController.navigateUp() },
+            onClick = { navigator.pop() },
             containerColor = Color.Gray
         )
     }
@@ -110,19 +116,14 @@ fun ActionButtons(navController: NavController, viewModel: AddProductViewModel) 
 @Composable
 fun ProductImage() {
     Box(
-        modifier = Modifier
-            .size(150.dp)
-            .clickable {
-                // TODO abrir selecionador de imagem
-            },
-        contentAlignment = Alignment.Center
+        modifier = Modifier.size(150.dp).clickable {
+            // TODO abrir selecionador de imagem
+        }, contentAlignment = Alignment.Center
     ) {
         Icon(
             Icons.Filled.Face,
             contentDescription = "Placeholder",
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
+            modifier = Modifier.fillMaxSize().padding(16.dp)
         )
     }
 }
@@ -142,14 +143,12 @@ fun ProductForm(
     )
     Spacer(modifier = Modifier.height(16.dp))
 
-    CategoryDropdown(
-        selectedCategory = uiState.product.category,
+    CategoryDropdown(selectedCategory = uiState.product.category,
         categories = uiState.categories,
         onCategorySelected = { viewModel.setCategory(it) },
         expanded = expanded,
         onExpandedChange = onExpandedChange,
-        onNewCategory = { newCategoryName -> viewModel.addCategory(newCategoryName) }
-    )
+        onNewCategory = { newCategoryName -> viewModel.addCategory(newCategoryName) })
     Spacer(modifier = Modifier.height(16.dp))
 
     ProductPriceField(uiState.product.price.toString()) { newPrice ->
@@ -175,55 +174,37 @@ fun CategoryDropdown(
     var newCategoryName by remember { mutableStateOf("") }
     var showNewCategoryField by remember { mutableStateOf(false) }
 
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { onExpandedChange() }
-    ) {
+    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { onExpandedChange() }) {
         OutlinedTextField(
             value = selectedCategory?.description ?: "",
             onValueChange = {},
             label = { Text("Categoria") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth(),
+            modifier = Modifier.menuAnchor().fillMaxWidth(),
             readOnly = true
         )
 
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { onExpandedChange() }
-        ) {
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { onExpandedChange() }) {
             categories.forEach { category ->
-                DropdownMenuItem(
-                    text = { Text(category.description) },
-                    onClick = {
-                        onCategorySelected(category)
-                        onExpandedChange()
-                    }
-                )
+                DropdownMenuItem(text = { Text(category.description) }, onClick = {
+                    onCategorySelected(category)
+                    onExpandedChange()
+                })
             }
 
-            DropdownMenuItem(
-                text = { Text("Criar nova categoria") },
-                onClick = {
-                    showNewCategoryField = true
-                    onExpandedChange()
-                }
-            )
+            DropdownMenuItem(text = { Text("Criar nova categoria") }, onClick = {
+                showNewCategoryField = true
+                onExpandedChange()
+            })
         }
     }
 
     if (showNewCategoryField) {
         Spacer(modifier = Modifier.height(8.dp))
-        cardNewItem(
-            value = newCategoryName,
-            onValueChange = { newCategoryName = it },
-            onClick = {
-                onNewCategory(newCategoryName)
-                showNewCategoryField = false
-            },
-            label = "Nova Categoria"
+        cardNewItem(value = newCategoryName, onValueChange = { newCategoryName = it }, onClick = {
+            onNewCategory(newCategoryName)
+            showNewCategoryField = false
+        }, label = "Nova Categoria"
         )
     }
 }
@@ -283,6 +264,3 @@ fun ProductQuantityField(value: String, onValueChange: (String) -> Unit) {
     )
 }
 
-fun getDecimalRegex(): Regex {
-    return """\d*\.?\d*""".toRegex()
-}

@@ -7,17 +7,18 @@ import dev.azeredo.domain.model.Category
 import dev.azeredo.domain.usecase.category.AddCategory
 import dev.azeredo.domain.usecase.category.GetAllCategories
 import dev.azeredo.domain.usecase.product.AddProduct
+import dev.azeredo.domain.usecase.product.GetProductById
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+
 class AddProductViewModel(
     private val addProduct: AddProduct,
     private val addCategory: AddCategory,
-    private val getAllCategories: GetAllCategories
+    private val getAllCategories: GetAllCategories,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(AddProductUiState())
     val uiState: StateFlow<AddProductUiState> get() = _uiState.asStateFlow()
 
@@ -30,7 +31,9 @@ class AddProductViewModel(
     }
 
     fun setProduct(product: Product) {
-        _uiState.value = _uiState.value.copy(product = product)
+        if (product.id > 0) {
+            _uiState.value = _uiState.value.copy(product = product)
+        }
     }
 
     fun addProduct() {

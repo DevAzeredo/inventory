@@ -69,9 +69,11 @@ kotlin {
             // db
             implementation(libs.room.runtime)
             implementation(libs.sqlite.bundled)
-            //navigation
-            implementation(libs.navigation.compose.v270alpha07)
-
+            //navigation, nao consegui enviar parametros para desktop, mobile funcionou mas desk nao, decidi usar voyager
+//            implementation(libs.navigation.compose.v270alpha07)
+            implementation(libs.voyager.navigator)
+            implementation(libs.voyager.transitions)
+            implementation(libs.voyager.screenmodel)
 
         }
         desktopMain.dependencies {

@@ -28,6 +28,8 @@ navigationComposeVersion = "2.7.0-alpha07"
 sqlite = "2.5.0-SNAPSHOT"
 room = "2.7.0-alpha07"
 uiToolingPreviewDesktop = "1.6.11"
+voyagerNavigator = "1.1.0-alpha04"
+voyagerTransitions = "1.1.0-alpha04"
 
 [libraries]
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
@@ -65,6 +67,9 @@ room-runtime-android = { module = "androidx.room:room-runtime-android", version.
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 ui-tooling-preview-desktop = { module = "org.jetbrains.compose.ui:ui-tooling-preview-desktop", version.ref = "uiToolingPreviewDesktop" }
+voyager-screenmodel = { module = "cafe.adriel.voyager:voyager-screenmodel", version.ref = "voyagerNavigator" }
+voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyagerTransitions" }
+voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyagerNavigator" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
