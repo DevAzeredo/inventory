@@ -16,22 +16,23 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -57,11 +58,9 @@ class InboundScreen : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         InboundContent(navigator)
-
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun InboundContent(navigator: Navigator) {
     val viewModel = koinViewModel<InboundViewModel>()
@@ -70,55 +69,127 @@ fun InboundContent(navigator: Navigator) {
     var quantity by remember { mutableStateOf("") }
     val selectedProductList by uiState.selectedProductList.collectAsState(initial = emptyList())
 
-    Scaffold(topBar = {
-        TopAppBar(title = { Text("Product Inflow") }, navigationIcon = {
-            IconButton(onClick = {
-                navigator.pop()
-            }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-            }
-        })
-    }) {
+    Scaffold(
+        topBar = { InboundTopBar(navigator) },
+        floatingActionButton = { ProductFabMenu(selectedProductList, viewModel::saveInboundEntries) }
+    ) { paddingValues ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .padding(paddingValues)
         ) {
-            Text("Select Product:")
             ProductDropdown(
-                productsListFlow = uiState.productList, selectedProduct = selectedProduct
-            ) {
-                selectedProduct = it
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            TextField(
-                value = quantity,
-                onValueChange = { quantity = it },
-                label = { Text("Quantity to add") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
+                productsListFlow = uiState.productList,
+                selectedProduct = selectedProduct,
+                onProductSelected = { selectedProduct = it }
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
-            FloatingActionButton(onClick = {
-                selectedProduct?.let { product ->
-                    val inboundAmount = quantity.toDoubleOrNull() ?: 0.0
-                    viewModel.addProductInbound(product, inboundAmount)
-                }
-            }, content = { Text("Add") })
+            QuantityInputField(quantity) { newQuantity ->
+                if (newQuantity.matches(getDecimalRegex())) quantity = newQuantity
+            }
 
-            FlowRow(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.Center
-            ) {
-                selectedProductList.forEach { product ->
-                    Box(modifier = Modifier.width(300.dp).padding(8.dp)) {
-                        SelectedProductCard(product) { newQuantity, product ->
-                            viewModel.setQuantity(newQuantity, product)
-                        }
+            Spacer(Modifier.height(16.dp))
+
+            AddButton(
+                onAdd = {
+                    selectedProduct?.let { product ->
+                        val inboundAmount = quantity.toDoubleOrNull() ?: 0.0
+                        viewModel.setProductInbound(product, inboundAmount)
                     }
                 }
+            )
+
+            ProductList(
+                productList = selectedProductList,
+                onQuantityChange = { quantity, product ->
+                    viewModel.setProductInbound(product, quantity)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun ProductFabMenu(
+    onSave: () -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box {
+        FloatingActionButton(onClick = { expanded = !expanded }) {
+            Icon(Icons.Default.Menu, contentDescription = "Open Menu")
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(
+                text = { Text("Confirm Entry") },
+                onClick = {
+                    onSave()
+                    expanded = false
+                }
+            )
+            DropdownMenuItem(
+                text = { Text("Discard Changes") },
+                onClick = {
+                    expanded = false
+                }
+            )
+        }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun InboundTopBar(navigator: Navigator) {
+    TopAppBar(
+        title = { Text("Product Inflow") },
+        navigationIcon = {
+            IconButton(onClick = { navigator.pop() }) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+            }
+        },
+        modifier = Modifier.fillMaxWidth().padding(8.dp)
+    )
+}
+
+@Composable
+fun QuantityInputField(value: String, onValueChange: (String) -> Unit) {
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text("Quantity to add") },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+fun AddButton(onAdd: () -> Unit) {
+    FloatingActionButton(onClick = onAdd) {
+        Text("Add")
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun ProductList(
+    productList: List<Product>,
+    onQuantityChange: (Double, Product) -> Unit
+) {
+    FlowRow(
+        modifier = Modifier.verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.Center
+    ) {
+        productList.forEach { product ->
+            Box(modifier = Modifier.width(300.dp).padding(8.dp)) {
+                SelectedProductCard(product, onQuantityChange)
             }
         }
     }
@@ -128,7 +199,7 @@ fun InboundContent(navigator: Navigator) {
 fun SelectedProductCard(product: Product, onQuantityChange: (Double, Product) -> Unit) {
     Card(modifier = Modifier.padding(8.dp)) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-            Text(text = product.name, style = MaterialTheme.typography.titleMedium)
+            Text(text = product.name)
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -136,21 +207,15 @@ fun SelectedProductCard(product: Product, onQuantityChange: (Double, Product) ->
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = {
-                    if (product.quantity > 0) {
-                        onQuantityChange(-1.0, product)
-                    }
-                }) {
-                    Icon(imageVector = AppIcons.Remove, contentDescription = "Decrease Quantity")
+                IconButton(onClick = { if (product.quantity > 0) onQuantityChange(-1.0, product) }) {
+                    Icon(AppIcons.Remove, contentDescription = "Decrease Quantity")
                 }
-                ProductQuantityField(
-                    product.quantity.toString(),
-                ) { quantity -> onQuantityChange(quantity.toDouble(), product) }
-
-                IconButton(onClick = {
-                    onQuantityChange(+1.0, product)
-                }) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = "Increase Quantity")
+                ProductQuantityField(value = product.quantity.toString()) { quantity ->
+                    onQuantityChange(-product.quantity, product)
+                    onQuantityChange(quantity.toDouble(), product)
+                }
+                IconButton(onClick = { onQuantityChange(+1.0, product) }) {
+                    Icon(Icons.Default.Add, contentDescription = "Increase Quantity")
                 }
             }
         }
@@ -162,18 +227,15 @@ fun ProductQuantityField(value: String, onValueChange: (String) -> Unit) {
     OutlinedTextField(
         value = value,
         onValueChange = {
-            if (it.matches(getDecimalRegex())) {
-                onValueChange(it)
-            }
+            if (it.matches(getDecimalRegex())) onValueChange(it)
         },
-        label = { "Quantity" },
+        label = { Text("Quantity") },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
         modifier = Modifier.width(100.dp)
     )
 }
 
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDropdown(
     productsListFlow: Flow<List<Product>>,
@@ -192,7 +254,7 @@ fun ProductDropdown(
             label = { Text("Product") },
             trailingIcon = {
                 Icon(
-                    imageVector = Icons.Filled.ArrowDropDown,
+                    Icons.Filled.ArrowDropDown,
                     contentDescription = null,
                     modifier = if (expanded) Modifier.rotate(180f) else Modifier
                 )
@@ -202,13 +264,14 @@ fun ProductDropdown(
 
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             productsList.forEach { product ->
-                DropdownMenuItem(text = { Text(product.name) }, onClick = {
-                    onProductSelected(product)
-                    expanded = false
-                })
+                DropdownMenuItem(
+                    text = { Text(product.name) },
+                    onClick = {
+                        onProductSelected(product)
+                        expanded = false
+                    }
+                )
             }
         }
     }
 }
-
-

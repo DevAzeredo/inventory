@@ -59,7 +59,7 @@ class ProductListScreen : Screen {
         val viewModel = koinViewModel<ProductListViewModel>()
         val uiState by viewModel.uiState.collectAsState()
 
-        Scaffold(topBar = { SearchTopBar(viewModel, navigator) },
+        Scaffold(topBar = { SearchTopBar(viewModel) },
             floatingActionButton = { ProductFabMenu(navigator) },
             modifier = Modifier.fillMaxSize()
         ) {
@@ -77,7 +77,7 @@ class ProductListScreen : Screen {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchTopBar(viewModel: ProductListViewModel, navigator: Navigator) {
+fun SearchTopBar(viewModel: ProductListViewModel) {
     var searchQuery by remember { mutableStateOf("") }
 
     TopAppBar(

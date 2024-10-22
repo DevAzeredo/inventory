@@ -9,6 +9,7 @@ import dev.azeredo.data.category.CategoryDao
 import dev.azeredo.data.category.CategoryEntity
 import dev.azeredo.data.product.ProductDao
 import dev.azeredo.data.product.ProductEntity
+import dev.azeredo.data.stockmovement.StockMovementDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 
@@ -17,6 +18,7 @@ import kotlinx.coroutines.IO
 abstract class AppDatabase : RoomDatabase() {
     abstract fun getProductDao(): ProductDao
     abstract fun getCategoryDao(): CategoryDao
+    abstract fun getStockMovementDao(): StockMovementDao
 }
 
 // The Room compiler generates the `actual` implementations.
