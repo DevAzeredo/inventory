@@ -1,4 +1,5 @@
-package dev.azeredo.presentation.inbound
+package dev.azeredo.presentation.outbound
+
 
 import Product
 import androidx.compose.foundation.layout.Arrangement
@@ -60,17 +61,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.koin.compose.viewmodel.koinViewModel
 
-class InboundScreen : Screen {
+class OutboundScreen : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        InboundContent(navigator)
+        OutboundContent(navigator)
     }
 }
 
 @Composable
-fun InboundContent(navigator: Navigator) {
-    val viewModel = koinViewModel<InboundViewModel>()
+fun OutboundContent(navigator: Navigator) {
+    val viewModel = koinViewModel<OutboundViewModel>()
     val uiState by viewModel.uiState.collectAsState()
     val toaster = rememberToasterState(
         onToastDismissed = { viewModel.removeUiMessageById(it.id as Long) },
@@ -85,7 +86,7 @@ fun InboundContent(navigator: Navigator) {
     var selectedProduct by remember { mutableStateOf<Product?>(null) }
 
     Scaffold(
-        topBar = { InboundTopBar(navigator) },
+        topBar = { OutboundTopBar(navigator) },
         floatingActionButton = {
             ProductFabMenu(
                 onSave = { viewModel.saveStockMovements() },
@@ -123,7 +124,7 @@ fun InboundContent(navigator: Navigator) {
             AddButton(
                 onAdd = {
                     selectedProduct?.let { product ->
-                        viewModel.addProductInbound(product)
+                        viewModel.addProductOutbound(product)
                     }
                 }
             )
@@ -131,7 +132,7 @@ fun InboundContent(navigator: Navigator) {
             ProductList(
                 productsListFlow = uiState.selectedProductList,
                 onQuantityChange = { quantity, product ->
-                    viewModel.updateProductInbound(product, quantity, uiState.reason)
+                    viewModel.updateProductOutbound(product, quantity, uiState.reason)
                 }
             )
         }
@@ -175,9 +176,9 @@ fun ProductFabMenu(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InboundTopBar(navigator: Navigator) {
+fun OutboundTopBar(navigator: Navigator) {
     TopAppBar(
-        title = { Text("Product Inbound") },
+        title = { Text("Product Outbound") },
         navigationIcon = {
             IconButton(onClick = { navigator.pop() }) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -240,19 +241,19 @@ fun SelectedProductCard(product: Product, onQuantityChange: (Double, Product) ->
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(onClick = {
-                    if (product.quantity > 0) onQuantityChange(
-                        -1.0,
+                    if (product.quantity < 0) onQuantityChange(
+                        1.0,
                         product
                     )
                 }) {
-                    Icon(AppIcons.Remove, contentDescription = "Decrease Quantity for Inbound")
+                    Icon(AppIcons.Remove, contentDescription = "Decrease Quantity for Outbound")
                 }
                 ProductQuantityField(value = product.quantity.toString()) { quantity ->
                     onQuantityChange(-product.quantity, product)
                     onQuantityChange(quantity.toDouble(), product)
                 }
-                IconButton(onClick = { onQuantityChange(+1.0, product) }) {
-                    Icon(Icons.Default.Add, contentDescription = "Increase Quantity for Inbound")
+                IconButton(onClick = { onQuantityChange(-1.0, product) }) {
+                    Icon(Icons.Default.Add, contentDescription = "Increase Quantity for Outbound")
                 }
             }
         }

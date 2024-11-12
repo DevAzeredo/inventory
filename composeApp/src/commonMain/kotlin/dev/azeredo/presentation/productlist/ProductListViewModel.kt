@@ -3,7 +3,6 @@ package dev.azeredo.presentation.productlist
 import Product
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.azeredo.data.AppDatabase
 import dev.azeredo.domain.usecase.product.getAllProducts
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +25,8 @@ class ProductListViewModel(
             val productList = getAllProducts.invoke()
             _uiState.value = _uiState.value.copy(
                 productList = productList,
-                productListFiltered = productList
+                productListFiltered = productList,
+                searchQuery = ""
             )
         }
     }
@@ -35,7 +35,10 @@ class ProductListViewModel(
         viewModelScope.launch {
             if (input.isEmpty()) {
                 _uiState.value =
-                    _uiState.value.copy(productListFiltered = _uiState.value.productList)
+                    _uiState.value.copy(
+                        productListFiltered = _uiState.value.productList,
+                        searchQuery = input
+                    )
                 return@launch
             }
             val filteredList = _uiState.value.productList.map { productList ->
@@ -43,17 +46,14 @@ class ProductListViewModel(
                     product.name.contains(input, ignoreCase = true)
                 }
             }
-            _uiState.value = _uiState.value.copy(productListFiltered = filteredList)
-        }
-    }
-    fun onRemoveProduct(input: String) {
-        viewModelScope.launch {
-
+            _uiState.value =
+                _uiState.value.copy(productListFiltered = filteredList, searchQuery = input)
         }
     }
 
     data class ProductListUiState(
         val productList: Flow<List<Product>> = flowOf(emptyList()),
         val productListFiltered: Flow<List<Product>> = flowOf(emptyList()),
+        val searchQuery: String = "",
     )
 }

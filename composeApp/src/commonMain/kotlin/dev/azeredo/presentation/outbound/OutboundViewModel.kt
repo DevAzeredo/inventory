@@ -1,4 +1,4 @@
-package dev.azeredo.presentation.inbound
+package dev.azeredo.presentation.outbound
 
 import Product
 import androidx.lifecycle.ViewModel
@@ -19,12 +19,12 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 
 
-class InboundViewModel(
-    private val saveInboundMovements: SaveMovements,
+class OutboundViewModel(
+    private val saveOutboundMovements: SaveMovements,
     private val getAllProducts: getAllProducts,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(InboundUiState())
-    val uiState: StateFlow<InboundUiState> get() = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(OutboundUiState())
+    val uiState: StateFlow<OutboundUiState> get() = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -47,20 +47,20 @@ class InboundViewModel(
                     existing.copy(quantity = existing.quantity + selected.first.quantity)
                 }
 
-                saveInboundMovements(movements, updatedProducts)
+                saveOutboundMovements(movements, updatedProducts)
 
                 _uiState.value = _uiState.value.copy(selectedProductList = flowOf(emptyList()))
                 addUiMessage(
                     UiMessage.Success(
                         id = Clock.System.now().toEpochMilliseconds(),
-                        message = "Inbound successfully registered!"
+                        message = "Outbound successfully registered!"
                     )
                 )
             } catch (e: Exception) {
                 addUiMessage(
                     UiMessage.Error(
                         id = Clock.System.now().toEpochMilliseconds(),
-                        message = "Failed to register inbound: ${e.message}"
+                        message = "Failed to register Outbound: ${e.message}"
                     )
                 )
             }
@@ -78,22 +78,22 @@ class InboundViewModel(
         return StockMovement(
             productId = productWithReason.first.id,
             quantity = productWithReason.first.quantity,
-            movementType = MovementType.ENTRY,
+            movementType = MovementType.EXIT,
             movementDate = Clock.System.now().toEpochMilliseconds(),
             reason = productWithReason.second
         )
     }
 
-    fun addProductInbound(product: Product) {
+    fun addProductOutbound(product: Product) {
         viewModelScope.launch {
-            if (_uiState.value.quantity > 0) {
+            if (_uiState.value.quantity < 0) {
                 val currentList = _uiState.value.selectedProductList.first()
 
                 val existingProduct = currentList.firstOrNull {
                     it.first.id == product.id
                 }
                 if (existingProduct != null) {
-                    updateProductInbound(existingProduct.first, _uiState.value.quantity, _uiState.value.reason)
+                    updateProductOutbound(existingProduct.first, _uiState.value.quantity, _uiState.value.reason)
                     return@launch
                 }
                 val newProduct = product.copy(quantity = _uiState.value.quantity)
@@ -103,14 +103,14 @@ class InboundViewModel(
         }
     }
 
-    fun updateProductInbound(product: Product, amount: Double, reason: String) {
+    fun updateProductOutbound(product: Product, amount: Double, reason: String) {
         viewModelScope.launch {
             val currentList = _uiState.value.selectedProductList.first()
 
             val updatedProductList = currentList.mapNotNull { (existingProduct, existingReason) ->
                 if (existingProduct.id == product.id) {
                     val newQuantity = existingProduct.quantity + amount
-                    if (newQuantity > 0) existingProduct.copy(quantity = newQuantity) to reason else null
+                    if (newQuantity < 0) existingProduct.copy(quantity = newQuantity) to reason else null
                 } else {
                     existingProduct to existingReason
                 }
@@ -138,7 +138,7 @@ class InboundViewModel(
     fun setQuantity(newQuantity: String) {
         viewModelScope.launch {
             if (newQuantity.matches(getDecimalRegex())) _uiState.value =
-                _uiState.value.copy(quantity = newQuantity.toDouble())
+                _uiState.value.copy(quantity = -newQuantity.toDouble())
         }
     }
 
@@ -151,7 +151,7 @@ class InboundViewModel(
 
 }
 
-data class InboundUiState(
+data class OutboundUiState(
     val productList: Flow<List<Product>> = flowOf(emptyList()),
     val selectedProductList: Flow<List<Pair<Product, String>>> = flowOf(emptyList()),
     val quantity: Double = 0.0,

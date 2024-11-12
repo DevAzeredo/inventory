@@ -9,7 +9,8 @@ fun StockMovementEntity.toDomainModel(): StockMovement {
         productId = productId,
         quantity = quantity,
         movementType = MovementType.valueOf(movementType),
-        movementDate = movementDate
+        movementDate = movementDate,
+        reason = reason
     )
 }
 
@@ -19,6 +20,7 @@ fun StockMovement.toEntity(): StockMovementEntity {
         productId = productId,
         quantity = quantity,
         movementType = movementType.name,
-        movementDate = movementDate
+        movementDate = movementDate,
+        reason = reason
     )
 }

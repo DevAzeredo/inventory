@@ -66,6 +66,7 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.lifecycle.viewmodel)
             implementation(libs.navigation.compose)
+            implementation(libs.kotlinx.datetime)
             // db
             implementation(libs.room.runtime)
             implementation(libs.sqlite.bundled)
@@ -74,6 +75,8 @@ kotlin {
             implementation(libs.voyager.navigator)
             implementation(libs.voyager.transitions)
             implementation(libs.voyager.screenmodel)
+            // toast
+            implementation(libs.sonner)
 
         }
         desktopMain.dependencies {

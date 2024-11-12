@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.azeredo.domain.model.Category
 import dev.azeredo.domain.usecase.category.AddCategory
+import dev.azeredo.domain.usecase.category.AddProductImageUseCase
 import dev.azeredo.domain.usecase.category.GetAllCategories
 import dev.azeredo.domain.usecase.product.AddProduct
 import dev.azeredo.domain.usecase.product.GetProductById
+import dev.azeredo.domain.usecase.productimage.RemoveProductImageUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,6 +20,8 @@ class AddProductViewModel(
     private val addProduct: AddProduct,
     private val addCategory: AddCategory,
     private val getAllCategories: GetAllCategories,
+    private val addProductImageUseCase: AddProductImageUseCase,
+    private val removeProductImageUseCase: RemoveProductImageUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AddProductUiState())
     val uiState: StateFlow<AddProductUiState> get() = _uiState.asStateFlow()
@@ -27,6 +31,17 @@ class AddProductViewModel(
             getAllCategories.invoke().collect { c ->
                 _uiState.value = _uiState.value.copy(categories = c)
             }
+        }
+    }
+    fun addProductImage {
+        viewModelScope.launch {
+            addProductImageUseCase(productId, image)
+        }
+    }
+
+    fun removeProductImage {
+        viewModelScope.launch {
+            removeProductImageUseCase(productId)
         }
     }
 

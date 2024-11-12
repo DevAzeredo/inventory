@@ -16,10 +16,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
@@ -49,6 +52,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.azeredo.presentation.AppIcons
 import dev.azeredo.presentation.addproduct.AddProductScreen
 import dev.azeredo.presentation.inbound.InboundScreen
+import dev.azeredo.presentation.outbound.OutboundScreen
+import dev.azeredo.presentation.stockmovement.StockMovementScreen
 import kotlinx.coroutines.flow.Flow
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -59,13 +64,19 @@ class ProductListScreen : Screen {
         val viewModel = koinViewModel<ProductListViewModel>()
         val uiState by viewModel.uiState.collectAsState()
 
-        Scaffold(topBar = { SearchTopBar(viewModel) },
+        Scaffold(
+            topBar = {
+                SearchTopBar(
+                    onSearchQueryChanged = { viewModel.onSearchQueryChanged(it) },
+                    uiState.searchQuery
+                )
+            },
             floatingActionButton = { ProductFabMenu(navigator) },
             modifier = Modifier.fillMaxSize()
         ) {
             Box(
                 modifier = Modifier.fillMaxSize().padding(top = 100.dp),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.TopCenter
             ) {
                 ProductListContent(
                     productList = uiState.productListFiltered, navigator = navigator
@@ -77,15 +88,13 @@ class ProductListScreen : Screen {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchTopBar(viewModel: ProductListViewModel) {
-    var searchQuery by remember { mutableStateOf("") }
-
+fun SearchTopBar(onSearchQueryChanged: (String) -> Unit, searchQuery: String) {
     TopAppBar(
         title = {
-            TextField(value = searchQuery,
+            TextField(
+                value = searchQuery,
                 onValueChange = { query ->
-                    searchQuery = query
-                    viewModel.onSearchQueryChanged(query)
+                    onSearchQueryChanged(query)
                 },
                 placeholder = { Text("Search products") },
                 modifier = Modifier.fillMaxWidth().padding(8.dp),
@@ -106,7 +115,7 @@ fun ProductFabMenu(navigator: Navigator) {
 
     Box {
         FloatingActionButton(onClick = { isFabMenuExpanded = !isFabMenuExpanded },
-            content = { Icon(Icons.Default.Add, contentDescription = "Options") })
+            content = { Icon(Icons.Default.Menu, contentDescription = "Options") })
 
         DropdownMenu(
             expanded = isFabMenuExpanded,
@@ -114,7 +123,7 @@ fun ProductFabMenu(navigator: Navigator) {
             DropdownMenuItem(text = { Text("Add Product") }, onClick = {
                 isFabMenuExpanded = false
                 navigator.push(AddProductScreen())
-            }, leadingIcon = { Icon(Icons.Default.Menu, contentDescription = "Add Product") })
+            }, leadingIcon = { Icon(Icons.Default.Add, contentDescription = "Add Product") })
             DropdownMenuItem(text = { Text("Inbound") }, onClick = {
                 isFabMenuExpanded = false
                 navigator.push(InboundScreen())
@@ -127,12 +136,13 @@ fun ProductFabMenu(navigator: Navigator) {
             })
             DropdownMenuItem(text = { Text("Outbound") }, onClick = {
                 isFabMenuExpanded = false
-                //  navigator.push("OutboundScreen")
+                  navigator.push(OutboundScreen())
             }, leadingIcon = { Icon(AppIcons.Outbound, contentDescription = "Outbound") })
 
             DropdownMenuItem(text = { Text("Reports") }, onClick = {
-                isFabMenuExpanded = false/* TODO: Handle reports navigation */
-            }, leadingIcon = { Icon(Icons.Default.ThumbUp, contentDescription = "Reports") })
+                navigator.push(StockMovementScreen())
+                isFabMenuExpanded = false
+            }, leadingIcon = { Icon(Icons.Outlined.Info, contentDescription = "Reports") })
         }
     }
 }
@@ -170,8 +180,8 @@ fun ProductItem(product: Product, onClick: () -> Unit) {
                 modifier = Modifier.padding(16.dp).width(50.dp).height(50.dp),
             )
             Text(text = product.name, style = MaterialTheme.typography.bodyMedium)
-            Text(text = "Categoria: ${product.category.description}")
-            Text(text = "Quantidade: ${product.quantity}")
+            Text(text = "Category: ${product.category.description}")
+            Text(text = "Quantity: ${product.quantity}")
         }
     }
 }

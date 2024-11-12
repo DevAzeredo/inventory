@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -152,12 +153,12 @@ fun ProductForm(
     Spacer(modifier = Modifier.height(16.dp))
 
     ProductPriceField(uiState.product.price.toString()) { newPrice ->
-        viewModel.setPrice(newPrice.toDoubleOrNull() ?: 0.0)
+        viewModel.setPrice(newPrice.toDouble())
     }
     Spacer(modifier = Modifier.height(16.dp))
 
     ProductQuantityField(uiState.product.quantity.toString()) { newQuantity ->
-        viewModel.setQuantity(newQuantity.toDoubleOrNull() ?: 0.0)
+        viewModel.setQuantity(newQuantity.toDouble())
     }
 }
 
@@ -181,7 +182,8 @@ fun CategoryDropdown(
             label = { Text("Categoria") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier.menuAnchor().fillMaxWidth(),
-            readOnly = true
+            readOnly = true,
+            visualTransformation = VisualTransformation.None
         )
 
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { onExpandedChange() }) {
@@ -236,14 +238,16 @@ fun cardNewItem(
 
 @Composable
 fun ProductPriceField(value: String, onValueChange: (String) -> Unit) {
+    val priceValue = if (value == "0.0") "" else value
     OutlinedTextField(
-        value = value,
-        onValueChange = {
-            if (it.matches(getDecimalRegex())) {
-                onValueChange(it)
+        value = priceValue,
+        onValueChange = { input ->
+            if (input.matches(getDecimalRegex())) {
+                onValueChange(input)
             }
         },
-        label = { Text("Preço") },
+        label = { Text("Price") },
+        maxLines = 1,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
         modifier = Modifier.fillMaxWidth()
     )
@@ -251,14 +255,16 @@ fun ProductPriceField(value: String, onValueChange: (String) -> Unit) {
 
 @Composable
 fun ProductQuantityField(value: String, onValueChange: (String) -> Unit) {
+    val quantityValue = if (value == "0.0") "" else value
     OutlinedTextField(
-        value = value,
+        value = quantityValue,
         onValueChange = {
             if (it.matches(getDecimalRegex())) {
                 onValueChange(it)
             }
         },
         label = { Text("Quantidade") },
+        maxLines = 1,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
         modifier = Modifier.fillMaxWidth()
     )

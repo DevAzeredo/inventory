@@ -11,5 +11,6 @@ data class StockMovementEntity(
     val productId: Long,
     val quantity: Double,
     val movementType: String,
-    val movementDate: Long
+    val movementDate: Long,
+    val reason:String,
 )

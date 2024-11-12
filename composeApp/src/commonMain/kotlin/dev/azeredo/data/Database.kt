@@ -10,10 +10,11 @@ import dev.azeredo.data.category.CategoryEntity
 import dev.azeredo.data.product.ProductDao
 import dev.azeredo.data.product.ProductEntity
 import dev.azeredo.data.stockmovement.StockMovementDao
+import dev.azeredo.data.stockmovement.StockMovementEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 
-@Database(entities = [ProductEntity::class, CategoryEntity::class], version = 1)
+@Database(entities = [ProductEntity::class, CategoryEntity::class, StockMovementEntity::class], version = 1)
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun getProductDao(): ProductDao
