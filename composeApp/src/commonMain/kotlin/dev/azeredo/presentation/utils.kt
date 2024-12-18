@@ -1,8 +1,6 @@
 package dev.azeredo.presentation
-
 import com.dokar.sonner.Toast
 import com.dokar.sonner.ToastType
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -26,7 +24,7 @@ fun UiMessage.toToast(): Toast = when (this) {
 
 fun getDateTimeFormated(date: Long): String {
     val instant = Instant.fromEpochMilliseconds(date)
-   return instant.toLocalDateTime(TimeZone.currentSystemDefault()).format(
+    return instant.toLocalDateTime(TimeZone.currentSystemDefault()).format(
         LocalDateTime.Format {
             hour()
             char(':')

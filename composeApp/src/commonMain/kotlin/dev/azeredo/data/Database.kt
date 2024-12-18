@@ -7,17 +7,20 @@ import androidx.room.RoomDatabaseConstructor
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.azeredo.data.category.CategoryDao
 import dev.azeredo.data.category.CategoryEntity
+import dev.azeredo.data.category.ProductImageEntity
 import dev.azeredo.data.product.ProductDao
 import dev.azeredo.data.product.ProductEntity
+import dev.azeredo.data.productimage.ProductImageDao
 import dev.azeredo.data.stockmovement.StockMovementDao
 import dev.azeredo.data.stockmovement.StockMovementEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 
-@Database(entities = [ProductEntity::class, CategoryEntity::class, StockMovementEntity::class], version = 1)
+@Database(entities = [ProductEntity::class, CategoryEntity::class, StockMovementEntity::class, ProductImageEntity::class], version = 1)
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun getProductDao(): ProductDao
+    abstract fun getProductImageDao(): ProductImageDao
     abstract fun getCategoryDao(): CategoryDao
     abstract fun getStockMovementDao(): StockMovementDao
 }

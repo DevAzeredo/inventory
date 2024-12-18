@@ -60,23 +60,19 @@ kotlin {
             implementation(libs.kotlinx.serialization.core)
             implementation(libs.kotlinx.serialization.json)
 
-            //di
             api(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.lifecycle.viewmodel)
             implementation(libs.navigation.compose)
             implementation(libs.kotlinx.datetime)
-            // db
             implementation(libs.room.runtime)
             implementation(libs.sqlite.bundled)
-            //navigation, nao consegui enviar parametros para desktop, mobile funcionou mas desk nao, decidi usar voyager
-//            implementation(libs.navigation.compose.v270alpha07)
             implementation(libs.voyager.navigator)
             implementation(libs.voyager.transitions)
             implementation(libs.voyager.screenmodel)
-            // toast
             implementation(libs.sonner)
+            implementation("com.mohamedrejeb.calf:calf-file-picker:0.6.1")
 
         }
         desktopMain.dependencies {

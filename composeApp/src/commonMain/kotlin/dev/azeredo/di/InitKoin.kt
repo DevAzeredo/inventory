@@ -7,7 +7,6 @@ import dev.azeredo.data.getRoomDatabase
 import dev.azeredo.di.modules.DaoModule
 import dev.azeredo.di.modules.RepositoryModule
 import dev.azeredo.domain.usecase.category.AddCategory
-import dev.azeredo.domain.usecase.category.AddProductImageUseCase
 import dev.azeredo.domain.usecase.category.GetAllCategories
 import dev.azeredo.domain.usecase.product.GetProductById
 import dev.azeredo.platform.platformModule
@@ -22,6 +21,8 @@ import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
 import dev.azeredo.domain.usecase.product.removeProduct
 import dev.azeredo.domain.usecase.product.UpdateProduct
+import dev.azeredo.domain.usecase.productimage.AddProductImageUseCase
+import dev.azeredo.domain.usecase.productimage.GetImageById
 import dev.azeredo.domain.usecase.stockmovement.SaveMovements
 import dev.azeredo.domain.usecase.stockmovement.SaveStockMovements
 import dev.azeredo.domain.usecase.productimage.RemoveProductImageUseCase
@@ -60,6 +61,7 @@ val domainModule = module {
     // product image
     factory { RemoveProductImageUseCase(get()) }
     factory { AddProductImageUseCase(get()) }
+    factory { GetImageById(get()) }
     // category
     factory { AddCategory(get()) }
     factory { GetAllCategories(get()) }

@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 
 
 fun getDatabaseBuilder(): RoomDatabase.Builder<AppDatabase> {
-    val dbFilePath = documentDirectory() + "/inventory.db"
+    val dbFilePath = documentDirectory() + "/asd.db"
     return Room.databaseBuilder<AppDatabase>(
         name = dbFilePath,
     )

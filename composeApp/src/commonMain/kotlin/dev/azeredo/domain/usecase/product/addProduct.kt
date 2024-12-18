@@ -8,6 +8,10 @@ class AddProduct(private val productRepository: ProductRepository) {
         if (product.name.isEmpty() || product.quantity < 0 || product.price < 0) {
             throw IllegalArgumentException("Invalid product data")
         }
-        productRepository.addProduct(product)
+        if (product.id > 0) {
+            productRepository.updateProduct(product)
+        } else {
+            productRepository.addProduct(product)
+        }
     }
 }

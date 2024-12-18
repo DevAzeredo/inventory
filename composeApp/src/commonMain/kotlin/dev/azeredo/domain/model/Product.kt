@@ -10,5 +10,6 @@ data class Product(
     val quantity: Double,
     val creationDate: Long,
     val updateDate: Long,
-    val image: ByteArray? = null
-)
+) {
+
+}

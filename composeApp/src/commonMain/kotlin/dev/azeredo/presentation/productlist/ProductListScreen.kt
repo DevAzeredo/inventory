@@ -1,6 +1,7 @@
 package dev.azeredo.presentation.productlist
 
 import Product
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,12 +17,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -49,6 +47,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.mohamedrejeb.calf.picker.toImageBitmap
 import dev.azeredo.presentation.AppIcons
 import dev.azeredo.presentation.addproduct.AddProductScreen
 import dev.azeredo.presentation.inbound.InboundScreen
@@ -64,13 +63,12 @@ class ProductListScreen : Screen {
         val viewModel = koinViewModel<ProductListViewModel>()
         val uiState by viewModel.uiState.collectAsState()
 
-        Scaffold(
-            topBar = {
-                SearchTopBar(
-                    onSearchQueryChanged = { viewModel.onSearchQueryChanged(it) },
-                    uiState.searchQuery
-                )
-            },
+        Scaffold(topBar = {
+            SearchTopBar(
+                onSearchQueryChanged = { viewModel.onSearchQueryChanged(it) },
+                uiState.searchQuery
+            )
+        },
             floatingActionButton = { ProductFabMenu(navigator) },
             modifier = Modifier.fillMaxSize()
         ) {
@@ -79,7 +77,7 @@ class ProductListScreen : Screen {
                 contentAlignment = Alignment.TopCenter
             ) {
                 ProductListContent(
-                    productList = uiState.productListFiltered, navigator = navigator
+                    productList = uiState.productListFiltered, navigator = navigator, uiState = uiState
                 )
             }
         }
@@ -91,8 +89,7 @@ class ProductListScreen : Screen {
 fun SearchTopBar(onSearchQueryChanged: (String) -> Unit, searchQuery: String) {
     TopAppBar(
         title = {
-            TextField(
-                value = searchQuery,
+            TextField(value = searchQuery,
                 onValueChange = { query ->
                     onSearchQueryChanged(query)
                 },
@@ -117,8 +114,7 @@ fun ProductFabMenu(navigator: Navigator) {
         FloatingActionButton(onClick = { isFabMenuExpanded = !isFabMenuExpanded },
             content = { Icon(Icons.Default.Menu, contentDescription = "Options") })
 
-        DropdownMenu(
-            expanded = isFabMenuExpanded,
+        DropdownMenu(expanded = isFabMenuExpanded,
             onDismissRequest = { isFabMenuExpanded = false }) {
             DropdownMenuItem(text = { Text("Add Product") }, onClick = {
                 isFabMenuExpanded = false
@@ -136,7 +132,7 @@ fun ProductFabMenu(navigator: Navigator) {
             })
             DropdownMenuItem(text = { Text("Outbound") }, onClick = {
                 isFabMenuExpanded = false
-                  navigator.push(OutboundScreen())
+                navigator.push(OutboundScreen())
             }, leadingIcon = { Icon(AppIcons.Outbound, contentDescription = "Outbound") })
 
             DropdownMenuItem(text = { Text("Reports") }, onClick = {
@@ -150,7 +146,10 @@ fun ProductFabMenu(navigator: Navigator) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ProductListContent(
-    productList: Flow<List<Product>>, modifier: Modifier = Modifier, navigator: Navigator
+    productList: Flow<List<Product>>,
+    modifier: Modifier = Modifier,
+    navigator: Navigator,
+    uiState: ProductListViewModel.ProductListUiState
 ) {
     val products by productList.collectAsState(initial = emptyList())
 
@@ -160,25 +159,36 @@ fun ProductListContent(
     ) {
         products.forEach { product ->
             Box(modifier = Modifier.width(300.dp).padding(8.dp)) {
-                ProductItem(product = product, onClick = {
-                    navigator.push(AddProductScreen(product))
-                })
+                ProductItem(
+                    product = product,
+                    onClick = { navigator.push(AddProductScreen(product)) },
+                    uiState.productImages[product.id] ?: ByteArray(0)
+                )
             }
         }
     }
 }
 
 @Composable
-fun ProductItem(product: Product, onClick: () -> Unit) {
+fun ProductItem(product: Product, onClick: () -> Unit, image: ByteArray) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).clickable(onClick = onClick),
     ) {
         Column(modifier = Modifier.padding(16.dp).align(Alignment.CenterHorizontally)) {
-            Icon(
-                Icons.Filled.Face,
-                contentDescription = "Placeholder",
-                modifier = Modifier.padding(16.dp).width(50.dp).height(50.dp),
-            )
+
+            if (image.isNotEmpty()) {
+                Image(
+                    bitmap = image.toImageBitmap(),
+                    contentDescription = "Product photo",
+                    modifier = Modifier.padding(16.dp).width(50.dp).height(50.dp),
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Filled.Face,
+                    contentDescription = "Product photo",
+                    modifier = Modifier.padding(16.dp).width(50.dp).height(50.dp),
+                )
+            }
             Text(text = product.name, style = MaterialTheme.typography.bodyMedium)
             Text(text = "Category: ${product.category.description}")
             Text(text = "Quantity: ${product.quantity}")

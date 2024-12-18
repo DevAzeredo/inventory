@@ -3,6 +3,7 @@
 package dev.azeredo.presentation.addproduct
 
 import Product
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,9 +50,19 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.mohamedrejeb.calf.core.LocalPlatformContext
+import com.mohamedrejeb.calf.io.readByteArray
+import com.mohamedrejeb.calf.picker.FilePickerFileType
+import com.mohamedrejeb.calf.picker.FilePickerSelectionMode
+import com.mohamedrejeb.calf.picker.rememberFilePickerLauncher
+import com.mohamedrejeb.calf.picker.toImageBitmap
 import dev.azeredo.domain.model.Category
 import dev.azeredo.presentation.getDecimalRegex
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
+
 
 
 data class AddProductScreen(val product: Product? = null) : Screen {
@@ -59,8 +70,7 @@ data class AddProductScreen(val product: Product? = null) : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         AddProductScreen(
-            navigator,
-            product ?: Product(0, "", Category(0, ""), 0.0, 0.0, 0, 0)
+            navigator, product ?: Product(0, "", Category(0, ""), 0.0, 0.0, 0, 0)
         )
     }
 }
@@ -78,7 +88,7 @@ fun AddProductScreen(navigator: Navigator, product: Product) {
             modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ProductImage()
+            ProductImage(viewModel, uiState)
             Spacer(modifier = Modifier.height(16.dp))
             ProductForm(uiState, viewModel, expanded) { expanded = !expanded }
         }
@@ -115,17 +125,31 @@ fun ActionButtons(navigator: Navigator, viewModel: AddProductViewModel) {
 }
 
 @Composable
-fun ProductImage() {
+fun ProductImage(viewModel: AddProductViewModel, uiState: AddProductViewModel.AddProductUiState) {
+    val context = LocalPlatformContext.current
+    val pickerLauncher = rememberFilePickerLauncher(type = FilePickerFileType.Image,
+        selectionMode = FilePickerSelectionMode.Single,
+        onResult = { files ->
+                viewModel.addProductImage(files, context)
+        })
     Box(
         modifier = Modifier.size(150.dp).clickable {
-            // TODO abrir selecionador de imagem
+            pickerLauncher.launch()
         }, contentAlignment = Alignment.Center
     ) {
-        Icon(
-            Icons.Filled.Face,
-            contentDescription = "Placeholder",
-            modifier = Modifier.fillMaxSize().padding(16.dp)
-        )
+        if (uiState.image.isNotEmpty()) {
+            Image(
+                bitmap = uiState.image.toImageBitmap(),
+                contentDescription = "Product photo",
+                modifier = Modifier.size(100.dp, 100.dp)
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Filled.Face,
+                contentDescription = "Product photo",
+                modifier = Modifier.fillMaxSize().padding(16.dp)
+            )
+        }
     }
 }
 

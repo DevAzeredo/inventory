@@ -1,6 +1,5 @@
 package dev.azeredo.data.category
 
-import dev.azeredo.data.product.ProductEntity
 import dev.azeredo.domain.model.Category
 
 

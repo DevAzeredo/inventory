@@ -1,4 +1,4 @@
-package dev.azeredo.domain.usecase.category
+package dev.azeredo.domain.usecase.productimage
 
 import ProductImageRepository
 
